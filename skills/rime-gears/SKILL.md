@@ -221,6 +221,13 @@ recognizer:
     reverse_lookup: "`[a-z]*'?$"
 ```
 
+> **注意：`recognizer` 會在 `editor` 之前攔截按鍵事件。**
+> `recognizer` 是一個 processor，當 `當前輸入串 + 新按鍵` 符合某個 pattern 時，它會直接回傳 `kAccepted`，使按鍵事件不再傳遞給後續的 processor（包括 `express_editor` / `fluid_editor`）。
+>
+> `editor` 在收到按鍵後才會為之前已選中的 segment 加上 `kSelectedBeforeEditing` tag——這個 tag 是「按退格刪除輸入而非打開舊 segment」功能的前提。若 `recognizer` 的 pattern 匹配了退格等按鍵（例如某個輔助 tag 的 pattern 寫得過寬），`editor` 就永遠無法添加 `kSelectedBeforeEditing`，導致退格行為異常。
+>
+> 解決辦法見下方 `matcher` 的說明。
+
 ---
 
 ### `selector`
@@ -336,6 +343,24 @@ reverse_lookup:
 模式匹配分段器，與 `recognizer` 配合，將符合正則模式的輸入段打上對應的 tag。
 
 無額外配置選項（模式在 `recognizer` 中配置）。
+
+> **輔助 tag 應使用獨立的 `matcher` 實例，而非共用同一個。**
+>
+> 若某個 tag 的用途是「為輸入段疊加輔助信息」（如 `has_emoji`、`english` 等），而非真正攔截特定輸入模式，請將其對應的 pattern 放入一個**獨立**的 `matcher` 節點，而不是與主 `matcher` 合用同一個 `recognizer`。
+>
+> 原因：`recognizer` 是 processor，在按鍵到達 `editor` 之前就完成匹配並返回 `kAccepted`。如果輔助 tag 的 pattern 被放在主 `recognizer` 裏，任何匹配該 pattern 的按鍵（包括退格）都會被提前攔截，導致 `editor` 無法為已選中 segment 加上 `kSelectedBeforeEditing` tag，進而使退格行為異常（打開錯誤的舊 segment 而非刪除輸入字元）。
+>
+> **正確做法：** 每個需要疊加的輔助 tag 均應單獨設為一個 `matcher`，對應一個只在**分段階段**（segmentor 流程）套用的 pattern，不與 processor 中的 `recognizer` 綁定。
+>
+> ```yaml
+> engine:
+>   segmentors:
+>     - matcher                    # 主 matcher：處理 reverse_lookup、url 等真正的輸入攔截
+>     - matcher@aux_tags           # 獨立 matcher：僅疊加輔助 tag，不干預按鍵處理
+>
+> aux_tags:
+>   # 在此定義 has_emoji 等輔助 tag 的 pattern
+> ```
 
 ---
 

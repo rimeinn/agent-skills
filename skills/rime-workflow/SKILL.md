@@ -3,7 +3,7 @@ name: rime-workflow
 description: This workflow describes the basic knowledge of rime. Always read this if the user is asking about Rime.
 metadata:
   author: RimeInn
-  version: 0.1.0
+  version: 0.2.0
 ---
 
 # Rime 工作流程
@@ -44,6 +44,25 @@ translation 最後會經過所有 filters（濾鏡）。每個濾鏡都是 Trans
 - 各方案的 schema.yaml
 - 用戶補充的 dict.yaml
 - .txt 可能是詞庫（vocabulary）或 stabledb（純文本的用戶詞庫，無法同步）
+
+## 新建方案
+
+創建自定義輸入方案需要以下文件（放置於用戶配置目錄）：
+
+1. `<schema_id>.schema.yaml` — 方案定義（引擎組件、拼寫規則、翻譯器等）
+2. `<dict_name>.dict.yaml` — 詞庫（文字與編碼的對應表）
+
+創建後在 `default.yaml` 的 `schema_list` 中添加方案，再重新部署：
+
+```yaml
+schema_list:
+  - {schema: luna_pinyin}
+  - {schema: my_schema}    # 新增
+```
+
+**詳細的 schema 創建說明見 rime-schema skill。**
+
+---
 
 ## 用戶補丁
 

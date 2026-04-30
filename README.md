@@ -22,4 +22,12 @@ Rime 配置的基礎知識。
 
 說明 Rime 拼寫運算的所有操作符（xlit、xform、erase、derive、fuzz、abbrev）及替換字串中的 Boost Regex 特殊序列（`\u`、`\U`、`\L` 等），附帶範例。
 
+### rime-schema
+
+說明如何從零創建 Rime 輸入方案，涵蓋 `schema.yaml` 完整結構、元數據、switches、引擎組件、speller、translator、dict.yaml 格式，以及拼音類和形碼類方案的完整範例。
+
+### rime-lua
+
+說明如何撰寫 Rime Lua 組件（processor、segmentor、translator、filter），涵蓋組件函數規範、生命週期（init/fini/func）、yield 模式、env 物件、notifier 訂閱，以及常見使用範例。附帶 `assets/librime.lua`（lua-language-server 類型標注檔）。
+
 
