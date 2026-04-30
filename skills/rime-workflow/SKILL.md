@@ -24,6 +24,8 @@ metadata:
 
 translation 最後會經過所有 filters（濾鏡）。每個濾鏡都是 Translation 到 Translation 的函數，可以獨立判斷是否保留、變換、添加、刪除候選項。
 
+**每個組件的詳細說明見 rime-gears skill。**
+
 ## 構建邏輯
 
 每個 Rime 安裝有共享數據目錄和用戶配置目錄，通常共享數據目錄是只讀的，提供：
@@ -44,6 +46,8 @@ translation 最後會經過所有 filters（濾鏡）。每個濾鏡都是 Trans
 - 各方案的 schema.yaml
 - 用戶補充的 dict.yaml
 - .txt 可能是詞庫（vocabulary）或 stabledb（純文本的用戶詞庫，無法同步）
+
+部署後，在用戶目錄/build下產生解析過 __patch 的最終 yaml 和 table.bin 、prism.bin，可以用於調試。
 
 ## 新建方案
 
@@ -143,7 +147,7 @@ Rime 的運行日誌是排查配置問題的主要手段。日誌分三個級別
 | macOS | fcitx5-macos（f5m） | `/tmp/Fcitx5.log`（單一日誌檔） |
 | Linux | iBus Rime / fcitx5-rime | `$XDG_RUNTIME_DIR/rime.*` 或 `/tmp/rime.*`（依前端而異） |
 
-日誌檔名格式通常為 `rime.前端名.用戶名.LOG.INFO.時間戳`，可只看 `rime.INFO` 符號連結（指向最新日誌）。
+日誌檔名格式通常為 `rime.前端名.用戶名.LOG.{INFO,WARNING,ERROR}.時間戳`，可只看 `rime.{INFO,WARNING,ERROR}` 符號連結（指向最新日誌）。
 
 常用搜索模式：
 
