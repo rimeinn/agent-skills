@@ -109,6 +109,43 @@ columns:
 ```
 調整該順序，則詞庫也需要與之對應。
 
+## 除錯方法
+
+### 查看日誌
+
+Rime 的運行日誌是排查配置問題的主要手段。日誌分三個級別：`INFO`（`rime.INFO`）、`WARNING`（`rime.WARNING`）、`ERROR`（`rime.ERROR`）。
+
+各平臺日誌目錄：
+
+| 平臺 | 前端 | 日誌目錄 |
+|------|------|----------|
+| Windows | 小狼毫（Weasel） | `%TEMP%\rime.weasel\` |
+| macOS | 鼠鬚管（Squirrel） | `$TMPDIR/rime.squirrel/`（通常為 `/var/folders/.../T/rime.squirrel/`） |
+| macOS | fcitx5-macos（f5m） | `/tmp/Fcitx5.log`（單一日誌檔） |
+| Linux | iBus Rime / fcitx5-rime | `$XDG_RUNTIME_DIR/rime.*` 或 `/tmp/rime.*`（依前端而異） |
+
+日誌檔名格式通常為 `rime.前端名.用戶名.LOG.INFO.時間戳`，可只看 `rime.INFO` 符號連結（指向最新日誌）。
+
+常用搜索模式：
+
+```bash
+# 查看 ERROR 與 WARNING
+grep -E "^[EW]" /path/to/rime.INFO
+
+# 查看部署（編譯）過程
+grep "deploy\|build\|load" /path/to/rime.INFO
+
+# 查看特定方案的錯誤
+grep "luna_pinyin\|schema_id" /path/to/rime.INFO
+```
+
+### 常見問題排查
+
+- **部署後無效**：查看日誌中是否有 `ERROR` 或 `failed`，常見原因為 YAML 格式錯誤（縮進、冒號後空格）。
+- **候選為空**：確認 `translator/dictionary` 名稱與 `.dict.yaml` 的 `name` 欄位一致，且詞庫已部署（有對應 `.table.bin`）。
+- **packs 中詞語無法輸入**：各 pack 獨立編譯，必須在 pack 詞庫中包含單字的編碼，否則整句拼不出音節。
+- **自訂 lua 不生效**：確認 `rime.lua` 或 `lua/` 目錄下的檔案存在於用戶資料目錄，且函數名稱與 yaml 中引用的名稱完全一致。
+
 ## Rime 同步
 
 修改 installation.yaml：
