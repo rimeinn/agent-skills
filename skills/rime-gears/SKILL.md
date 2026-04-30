@@ -444,6 +444,8 @@ engine:
 | `disable_user_dict_for_patterns` | 符合這些正則的輸入碼不使用用戶詞典 |
 | `packs` | 附加詞庫包名稱列表（字串列表），在主詞典之外額外載入對應的 `.table.bin`，可選，缺失時靜默忽略 |
 
+> table_translator 暫不支持 max_sentences 。
+
 > **`packs` 注意事項：** 每個 pack 的 `.table.bin` 是獨立編譯的，編譯時不依賴主詞典。因此每個 pack 的詞庫中**必須包含單字的編碼**，否則整句模式無法為 pack 中的詞語拼出正確的音節切分，導致詞語無法被輸入。
 
 **`table_translator` 特有選項：**
