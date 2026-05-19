@@ -1,0 +1,7 @@
+interface:
+  display_name: "Rime Weasel"
+  short_description: "Configure the Windows Weasel frontend"
+  default_prompt: "Use $rime-weasel to configure or troubleshoot the Windows Weasel frontend."
+
+policy:
+  allow_implicit_invocation: true

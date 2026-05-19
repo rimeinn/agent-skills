@@ -1,0 +1,7 @@
+interface:
+  display_name: "Rime Schema"
+  short_description: "Create and diagnose Rime schema files"
+  default_prompt: "Use $rime-schema to design or debug this Rime schema and dictionary configuration."
+
+policy:
+  allow_implicit_invocation: true

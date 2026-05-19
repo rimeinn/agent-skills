@@ -1,33 +1,45 @@
 # Agent Skills
 
-該倉庫提供 RIME 輸入法配置的 agent skills。Skill 遵循 [Agent Skills]() 格式。
+該倉庫提供 Rime 輸入法配置的 agent skills。Skill 遵循 [Agent Skills](https://agentskills.io/home) 格式。
 
 ⚠️ 該倉庫仍在建設中。
+
+## 結構約定
+
+每個 skill 的 `SKILL.md` 是短入口：說明何時使用、先檢查什麼、何時載入更詳細的資料。長篇參考內容放在一層 `references/` 目錄中，並由 `SKILL.md` 明確連結。UI metadata 放在 `agents/openai.yaml`。
+
+驗證格式：
+
+```sh
+scripts/validate_skills.rb
+```
 
 ## 提供的 Skill
 
 ### rime-workflow
 
-Rime 配置的基礎知識。
+Rime 配置任務的入口 skill：判斷問題屬於 schema、engine、Lua、plum、Weasel、部署或日誌哪一層。
 
 ### rime-gears
 
-說明 Rime 引擎所有內建處理器（processors）、分段器（segmentors）、翻譯器（translators）及過濾器（filters）的功能與配置選項。
-
-### rime-weasel
-
-說明小狼毫（Weasel）Windows 前端的配置，包含 `weasel.yaml` 所有選項、佈局、配色方案、字體語法、按應用/方案覆蓋外觀，以及方案安裝方法。
-
-### rime-spelling-algebra
-
-說明 Rime 拼寫運算的所有操作符（xlit、xform、erase、derive、fuzz、abbrev）及替換字串中的 Boost Regex 特殊序列（`\u`、`\U`、`\L` 等），附帶範例。
+Rime engine 組件路由與查表：processors、segmentors、translators、filters、tags、候選 pipeline。
 
 ### rime-schema
 
-說明如何從零創建 Rime 輸入方案，涵蓋 `schema.yaml` 完整結構、元數據、switches、引擎組件、speller、translator、dict.yaml 格式，以及拼音類和形碼類方案的完整範例。
+建立與診斷 Rime schema：`schema.yaml`、`dict.yaml`、translator 選型、engine template、部署檢查。
+
+### rime-spelling-algebra
+
+Rime 拼寫運算：`xlit`、`xform`、`erase`、`derive`、`fuzz`、`abbrev`、Boost.Regex replacement。
 
 ### rime-lua
 
-說明如何撰寫 Rime Lua 組件（processor、segmentor、translator、filter），涵蓋組件函數規範、生命週期（init/fini/func）、yield 模式、env 物件、notifier 訂閱，以及常見使用範例。附帶 `assets/librime.lua`（lua-language-server 類型標注檔）。
+撰寫與除錯 Rime Lua 組件：`lua_processor`、`lua_segmentor`、`lua_translator`、`lua_filter`。附帶 `assets/librime.lua`。
 
+### rime-plum
 
+使用 plum（東風破）安裝、更新、批次部署或打包 Rime 方案。
+
+### rime-weasel
+
+Windows 小狼毫（Weasel）前端配置：`weasel.custom.yaml`、候選窗樣式、字體、配色、app options、方案安裝。

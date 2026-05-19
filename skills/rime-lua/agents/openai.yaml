@@ -1,0 +1,7 @@
+interface:
+  display_name: "Rime Lua"
+  short_description: "Build and debug Rime Lua components"
+  default_prompt: "Use $rime-lua to implement or debug this Rime Lua component."
+
+policy:
+  allow_implicit_invocation: true

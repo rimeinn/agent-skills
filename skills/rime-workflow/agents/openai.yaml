@@ -1,0 +1,7 @@
+interface:
+  display_name: "Rime Workflow"
+  short_description: "Route and debug Rime configuration tasks"
+  default_prompt: "Use $rime-workflow to identify where my Rime configuration problem belongs and what to check first."
+
+policy:
+  allow_implicit_invocation: true

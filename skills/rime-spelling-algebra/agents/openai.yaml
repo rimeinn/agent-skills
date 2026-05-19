@@ -1,0 +1,7 @@
+interface:
+  display_name: "Rime Spelling Algebra"
+  short_description: "Work with Rime spelling transformation rules"
+  default_prompt: "Use $rime-spelling-algebra to choose and debug the right Rime algebra rules."
+
+policy:
+  allow_implicit_invocation: true

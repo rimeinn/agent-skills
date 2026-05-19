@@ -1,0 +1,7 @@
+interface:
+  display_name: "Rime Gears"
+  short_description: "Identify and configure Rime engine components"
+  default_prompt: "Use $rime-gears to find the Rime processor, segmentor, translator, or filter responsible for this behavior."
+
+policy:
+  allow_implicit_invocation: true

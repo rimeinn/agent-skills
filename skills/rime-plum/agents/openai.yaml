@@ -1,0 +1,7 @@
+interface:
+  display_name: "Rime Plum"
+  short_description: "Install and package Rime schemes with plum"
+  default_prompt: "Use $rime-plum to install, update, or package this Rime scheme with plum."
+
+policy:
+  allow_implicit_invocation: true
