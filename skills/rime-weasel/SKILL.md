@@ -10,6 +10,14 @@ metadata:
 
 小狼毫是 Rime 在 Windows 上的前端實現。用戶可透過 `weasel.yaml` 控制外觀與行為，並透過 `weasel.custom.yaml` 覆蓋設定。
 
+## librime 的关系
+
+小狼毫的發佈週期與 librime 不匹配，因此可能版本落後於最新 librime。
+
+查看 rime 版本的方法：
+1. 在程序目錄的 rime.dll 上右鍵選擇「屬性→詳情」。
+2. 看 installation.yaml。
+
 ## 目錄結構
 
 | 目錄 | 說明 |
