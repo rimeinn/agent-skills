@@ -35,7 +35,7 @@ engine:
 | 選項 | 說明 |
 |------|------|
 | `good_old_caps_lock` | `true` 時 CapsLock 保持傳統大寫鎖定行為（不切換輸入法模式） |
-| `switch_key` | 切換鍵與切換行為的對應表，可用鍵名為 `Caps_Lock`、`Shift_L`、`Shift_R` 等 |
+| `switch_key` | 切換鍵與行為的對應表：`Caps_Lock`、`Shift_L`、`Shift_R`、`Control_L`、`Control_R`、`Eisu_toggle`；`Alt_L`、`Alt_R`、`Super_L`、`Super_R` 需 librime 1.14 或更新版本，舊版不支援這四個切換鍵 |
 
 `switch_key` 的值（切換行為）：
 
@@ -45,8 +45,8 @@ engine:
 | `commit_text` | 提交當前已選候選後切換 |
 | `commit_code` | 提交原始輸入碼後切換 |
 | `clear` | 清空輸入串後切換 |
-| `set_ascii_mode` | 強制切換到西文模式（不切換回） |
-| `unset_ascii_mode` | 強制切換到中文模式（不切換回） |
+| `set_ascii_mode` | 切到西文模式，並清空尚未上屏的內容；若已在西文模式，則不做任何事。需 librime 1.14 或更新版本，舊版不支援此值 |
+| `unset_ascii_mode` | 切到中文模式，並清空尚未上屏的內容；若已在中文模式，則不做任何事。需 librime 1.14 或更新版本，舊版不支援此值 |
 
 **範例：**
 ```yaml
@@ -56,7 +56,11 @@ ascii_composer:
     Caps_Lock: clear
     Shift_L: inline_ascii
     Shift_R: commit_text
+    Alt_L: set_ascii_mode
+    Super_L: unset_ascii_mode
 ```
+
+Shift、Control、Alt、Super 是單獨短按後釋放觸發（500 ms 內），不是 `Alt+x` 一類組合快捷鍵；前端與桌面環境須將按下、釋放事件傳給 Rime。`Caps_Lock` 不支援 `inline_ascii`、`set_ascii_mode`、`unset_ascii_mode`，這些值會退回 `clear`。方案提供 `switch_key` 時會取代預設的整張切換鍵表，不會逐鍵補入預設值。
 
 ---
 
@@ -153,7 +157,51 @@ ascii_composer:
 
 光標移動處理器，處理在輸入串中移動光標的按鍵（方向鍵、Home、End 等）。
 
-無額外配置選項。
+**配置節點：** `navigator`。`bindings` 是「鍵名 → 動作」的 map，與 `key_binder/bindings` 的規則列表不同。
+
+| 選項 | 說明 |
+|------|------|
+| `bindings` | 橫排導航按鍵；未覆寫的鍵保留內建綁定 |
+| `vertical/bindings` | `_vertical` 為真時的直排導航按鍵 |
+| `syllable_jump_position` | 按音節跳轉的光標落點：預設 `after_delimiter` 停在分隔符之後，`before_delimiter` 停在之前；分隔符取自 `speller/delimiter`。此選項需 librime 1.17 或更新版本，舊版不能設定此落點 |
+
+| 動作 | 說明 |
+|------|------|
+| `rewind`、`forward` | 向左／右移動。librime 1.17 修正了步長判斷：未確認部分有多個分節且光標在分節邊界時按音節跳轉，否則逐輸入字元移動；這是既有動作的行為修正 |
+| `left_by_char`、`right_by_char` | 逐輸入字元移動，到邊界可迴轉 |
+| `left_by_syllable`、`right_by_syllable` | 按音節邊界跳轉，可迴轉；會考慮已確認部分與尚未翻譯的輸入 |
+| `left_by_char_no_loop`、`right_by_char_no_loop` | 逐字元移動且不迴轉。需 librime 1.16 或更新版本，舊版不支援這兩個動作 |
+| `left_by_syllable_no_loop`、`right_by_syllable_no_loop` | 按音節跳轉且不迴轉。需 librime 1.16 或更新版本，舊版不支援這兩個動作 |
+| `home` | 先到未選定部分起點，再到整個輸入開頭 |
+| `end` | 到整個輸入結尾 |
+| `noop` | 移除此組件對該鍵的綁定，讓後續處理器有機會處理 |
+
+預設 `Left/Right` 對應 `rewind/forward`，`Control+Left/Right` 按音節跳轉；直排改用 `Up/Down`。`rewind/forward` 的音節分支可迴轉，逐字元分支不迴轉。只在組字中處理未被前序處理器消耗的按鍵。
+
+```yaml
+# <schema_id>.custom.yaml；此例需 librime 1.17 或更新版本
+patch:
+  navigator/syllable_jump_position: before_delimiter
+  navigator/bindings:
+    Left: left_by_char_no_loop
+    Right: right_by_char_no_loop
+    Control+Left: left_by_syllable_no_loop
+    Control+Right: right_by_syllable_no_loop
+```
+
+例如 `ni'hao` 的音節邊界，預設停在 `ni'|hao`，`before_delimiter` 停在 `ni|'hao`；此選項不改變逐字元動作。
+
+#### 預設配置與方案覆寫
+
+librime 1.16 或更新版本會在部署時自動引用 `default:/navigator`、`default:/selector`，再遞迴合併方案配置，同名項目以方案為準。舊版不會自動引用這兩個節點，須在方案內配置或用 `__include` 引用。全域設定寫在 `default.custom.yaml`，方案例外寫在 `<schema_id>.custom.yaml`：
+
+```yaml
+patch:
+  navigator/bindings/Left: left_by_char_no_loop
+  selector/bindings/Control+p: previous_candidate
+```
+
+空的 `bindings: {}` 不會清除繼承或內建綁定；停用某鍵用 `noop`。修改後重新部署。
 
 ---
 
@@ -228,13 +276,15 @@ recognizer:
 
 **配置節點：** `selector`（可透過 `bindings` 自訂按鍵）
 
+`bindings` 同樣是鍵名到動作的 map；預設配置繼承與方案覆寫見上方 `navigator`。
+
 支援的動作：
 - `previous_candidate`：選擇上一個候選
 - `next_candidate`：選擇下一個候選
 - `previous_page`：向前翻頁
 - `next_page`：向後翻頁
 - `home`：跳至第一頁
-- `end`：跳至最後一頁
+- `end`：光標在輸入結尾時回到首個候選，否則交由後續導航處理（並非跳至末頁）
 
 ---
 
@@ -423,20 +473,37 @@ engine:
 | `tag` | 響應的 tag（預設 `abc`），支援列表 `tags` |
 | `dictionary` | 詞典名稱（對應 `dict.yaml` 的 `name`） |
 | `prism` | 棱鏡（拼寫索引）名稱，預設與 `dictionary` 相同。多個方案共用同一詞庫但有各自拼寫規則時，可指定不同的 prism |
-| `user_dict` | 用戶詞典名稱，預設與 `dictionary` 相同；設為 `false` 停用 |
+| `user_dict` | 用戶詞典名稱；未指定時從 `dictionary` 推導（去掉第一個點及其後綴）。停用請用 `enable_user_dict`，不要用 `user_dict: false` |
+| `enable_user_dict` | 是否載入用戶詞典，預設 `true`；設為 `false` 同時停用其查詢與學習 |
 | `db_class` | 用戶詞典的數據庫類型（`stabledb` 或 `userdb`） |
 | `enable_completion` | 啓用補全候選，預設 `true` |
 | `strict_spelling` | 嚴格拼寫（不允許補全），預設 `false` |
 | `contextual_suggestions` | 啓用上下文感知候選排序，預設 `false` |
 | `initial_quality` | 候選的初始質量分偏移，預設 `0`。調高可使此翻譯器的候選排在其他翻譯器之前 |
-| `max_sentences` | 最大整句候選數，預設 `1`。設為大於 `1` 時，建議同時將 `script_translator` 的 `max_homophones` 調大（如 `8`），效果更佳 |
+| `max_sentences` | `script_translator` 的最大整句候選數，預設 `1`，限於 `1`–`100`（`0` 也被修正為 `1`）。需 librime 1.17 或更新版本；舊版不支援多個整句候選。多句時可配合增大 `max_homophones`（如 `8`） |
+| `sentence_cutoff_threshold` | 多整句候選的相鄰權重相對差距截斷門檻，預設 `0.1`；較小時更早停止，且門檻隨候選數收緊。需 librime 1.17 或更新版本，舊版不支援此選項 |
 | `delimiter` | 音節分隔符，預設從 `speller/delimiter` 讀取 |
 | `preedit_format` | 輸入框中顯示的文字格式（拼寫運算列表） |
 | `comment_format` | 候選注釋的格式（拼寫運算列表） |
 | `disable_user_dict_for_patterns` | 符合這些正則的輸入碼不使用用戶詞典 |
+| `dictionary_exclude` | 排除系統詞典詞條的文字列表，逐項精確比對，並非正則。需 librime 1.14 或更新版本，舊版不支援此選項；作用範圍見下文 |
 | `packs` | 附加詞庫包名稱列表（字串列表），在主詞典之外額外載入對應的 `.table.bin`，可選，缺失時靜默忽略 |
 
-> table_translator 暫不支持 max_sentences 。
+`max_sentences`、`sentence_cutoff_threshold` 只用於 `script_translator`，不適用於 `table_translator`。至少兩個音節且沒有可靠的完整匹配詞時才造句，候選數可能少於上限。
+
+#### 詞條黑名單
+
+```yaml
+# <schema_id>.custom.yaml
+patch:
+  translator/dictionary_exclude:
+    - "不想要的詞"
+    - "另一個詞"
+```
+
+`table_translator`、`script_translator` 均支援；自訂實例如 `script_translator@foo` 改用 `foo/dictionary_exclude`。填入詞典原文，精確比對發生在 `simplifier` 轉換之前，涵蓋系統詞典及 `packs` 的查詞、補全和造句用詞。
+
+不影響用戶詞典、不禁止學習，也不過濾其他翻譯器；未排除的短詞仍可能組成相同文字。`disable_user_dict_for_patterns` 則按**輸入碼正則**停用用戶詞典查詢，兩者不可互代。
 
 > **`packs` 注意事項：** 每個 pack 的 `.table.bin` 是獨立編譯的，編譯時不依賴主詞典。因此每個 pack 的詞庫中**必須包含單字的編碼**，否則整句模式無法為 pack 中的詞語拼出正確的音節切分，導致詞語無法被輸入。
 
@@ -466,9 +533,31 @@ engine:
 |------|------|
 | `spelling_hints` | 在候選注釋中顯示拼音提示的最大字數，預設 `0`（不顯示） |
 | `always_show_comments` | 即使只有一個候選也顯示注釋，預設 `false` |
-| `max_homophones` | 每個音節保留的最大同音字數，預設 `1`。整句模式下建議調大（如 `8`） |
+| `max_homophones` | 造句詞圖中，每組相同起訖位置保留的候選詞數上限，預設 `1`；不限於單音節字。多整句候選可配合調大（如 `8`） |
 | `enable_correction` | 啓用輸入糾錯（容錯拼寫），預設 `false`。啓用後部署時會額外編譯 corrector 資料 |
 | `enable_word_completion` | 啓用詞語補全（輸入不完整時補全詞語），預設同 `enable_completion` |
+| `max_word_length` | 整條學入用戶詞典的最大音節數，預設 `0`（不限制）；不是輸入碼字元數或可輸入詞長上限 |
+| `core_word_length` | 跨相鄰分段組合學習的滑動窗口音節上限，預設 `0`（沿用整段串接）；正值且 `max_word_length` 為正時，實際取兩者較小值 |
+
+#### 自動學習與長句分段
+
+`max_word_length`、`core_word_length` 的配置及以下分段學習行為需 librime 1.14 或更新版本；舊版不能透過這兩個選項控制學習。
+
+上屏時學習，需要可寫的用戶詞典。相鄰分段在已確認分段或其他語言分段處結算，不跨越這些邊界組合。
+
+- `core_word_length: 0`：串接整組分段；正值則用滑動窗口學習相鄰完整分段的組合。例如同組「今天／天氣／好」、窗口 `4`，可學「今天天氣」「天氣好」及各分段，不學五音節整串。
+- 窗口不拆開單一候選。單一分段超過窗口，仍按 `max_word_length` 判斷是否保存。
+- 超過 `max_word_length` 不整條保存；若含多個組成詞且至少一個為多音節詞，仍更新組成詞的使用資訊。
+
+```yaml
+# <schema_id>.custom.yaml：啓用最多四音節的相鄰分段組合學習
+patch:
+  translator/enable_user_dict: true
+  translator/max_word_length: 8
+  translator/core_word_length: 4
+```
+
+這兩項只用於 `script_translator`；碼表造詞使用 `table_translator/max_phrase_length` 等選項。
 
 ---
 

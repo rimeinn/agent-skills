@@ -3,7 +3,7 @@ name: rime-gears
 description: Reference router for Rime engine components. Use when configuring or debugging processors, segmentors, translators, filters, formatters, menu options, Lua component references, tags, recognizer/matcher behavior, translator options, simplifier, reverse lookup filters, or candidate pipeline ordering. Load references/full-reference.md only when exact component options or examples are needed.
 metadata:
   author: RimeInn
-  version: 0.2.0
+  version: 0.3.0
 ---
 
 # Rime Gears
@@ -91,6 +91,7 @@ Load [full-reference](references/full-reference.md) when you need:
 
 - option tables for built-in processors, segmentors, translators, filters, or formatters;
 - concrete YAML examples for a component;
+- navigation bindings/default inheritance, ASCII switch keys, dictionary exclusions, or segmented learning;
 - OpenCC/simplifier options;
 - translator option details such as `dictionary`, `prism`, `packs`, `spelling_hints`, or `initial_quality`;
 - complete notes on `matcher`, `recognizer`, `reverse_lookup_filter`, or Lua component variants.
