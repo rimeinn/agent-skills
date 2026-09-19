@@ -43,3 +43,11 @@ Rime 拼寫運算：`xlit`、`xform`、`erase`、`derive`、`fuzz`、`abbrev`、
 ### rime-weasel
 
 Windows 小狼毫（Weasel）前端配置：`weasel.custom.yaml`、候選窗樣式、字體、配色、app options、方案安裝。
+
+## 維護
+
+從 [librime-lua 上游](https://github.com/hchunhui/librime-lua/blob/master/contrib/librime.lua) 更新類型標註：
+
+```sh
+sh scripts/update_librime_lua.sh
+```
